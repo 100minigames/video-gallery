@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Gallery</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --primary-color: #ff0000;
+            --secondary-color: #282828;
+            --background-color: #0f0f0f;
+            --card-color: #1f1f1f;
+            --text-color: #ffffff;
+            --text-secondary: #aaa;
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header Styles - NOT fixed */
+        header {
+            background-color: var(--secondary-color);
+            padding: 20px 0;
+            position: relative;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            margin-bottom: 30px;
+        }
+
+        .header-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .logo i {
+            font-size: 1.8rem;
+        }
+
+        .add-video-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+            white-space: nowrap;
+            touch-action: manipulation;
+        }
+
+        .add-video-btn:hover {
+            background-color: #cc0000;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 0, 0, 0.3);
+        }
+
+        .search-container {
+            width: 100%;
+        }
+
+        .search-bar {
+            position: relative;
+            width: 100%;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 16px 24px;
+            border-radius: 30px;
+            border: none;
+            background-color: var(--card-color);
+            color: var(--text-color);
+            font-size: 1rem;
+            padding-left: 55px;
+            transition: all 0.3s;
+            -webkit-appearance: none;
+        }
+
+        .search-bar input:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px var(--primary-color);
+        }
+
+        .search-bar i {
+            position: absolute;
+            left: 24px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            display: flex;
+            padding-bottom: 30px;
+            min-height: calc(100vh - 200px);
+        }
+
+        /* Video Gallery */
+        .video-gallery {
+            flex: 1;
+            width: 100%;
+        }
+
+        .gallery-title {
+            margin-bottom: 30px;
+            font-size: 1.8rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        .video-card {
+            background-color: var(--card-color);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .video-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .thumbnail-container {
+            position: relative;
+            width: 100%;
+            padding-top: 56.25%; /* 16:9 aspect ratio */
+            overflow: hidden;
+        }
+
+        .thumbnail-container img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+
+        .video-card:hover .thumbnail-container img {
+            transform: scale(1.05);
+        }
+
+        .video-info {
+            padding: 20px;
+        }
+
+        .video-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .video-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .delete-btn {
+            background-color: rgba(255, 0, 0, 0.1);
+            color: #ff6b6b;
+            border: none;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            touch-action: manipulation;
+        }
+
+        .delete-btn:hover {
+            background-color: rgba(255, 0, 0, 0.2);
+            color: #ff0000;
+        }
+
+        /* Video Player Page - NO HEADER HERE */
+        .video-player-page {
+            display: none;
+            width: 100%;
+            position: relative;
+        }
+
+        .player-header {
+            display: flex;
+            justify-content: flex-start;
+            margin-bottom: 30px;
+            padding: 10px 0;
+        }
+
+        .back-btn {
+            background-color: var(--card-color);
+            color: var(--text-color);
+            border: none;
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 20px;
+            border-radius: 30px;
+            transition: all 0.3s;
+            touch-action: manipulation;
+        }
+
+        .back-btn:hover {
+            background-color: var(--primary-color);
+            transform: translateX(-5px);
+        }
+
+        .player-container {
+            width: 100%;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        /* Video Player Container */
+        .video-player-container {
+            width: 100%;
+            position: relative;
+            background-color: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .video-player {
+            width: 100%;
+            height: 0;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            position: relative;
+        }
+
+        .video-player iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+
+        .player-title {
+            font-size: 1.6rem;
+            margin: 25px 0 15px 0;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #333;
+        }
+
+        /* Modern Toast Notifications */
+        .toast-container {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-width: 350px;
+        }
+
+        .toast {
+            background-color: var(--card-color);
+            border-left: 5px solid var(--primary-color);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            transform: translateX(400px);
+            transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            opacity: 0;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            border-left-color: #4CAF50;
+        }
+
+        .toast.error {
+            border-left-color: #f44336;
+        }
+
+        .toast.info {
+            border-left-color: #2196F3;
+        }
+
+        .toast-icon {
+            font-size: 1.5rem;
+            margin-top: 2px;
+        }
+
+        .toast.success .toast-icon {
+            color: #4CAF50;
+        }
+
+        .toast.error .toast-icon {
+            color: #f44336;
+        }
+
+        .toast.info .toast-icon {
+            color: #2196F3;
+        }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 1.1rem;
+        }
+
+        .toast-message {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 0;
+            margin-top: -5px;
+        }
+
+        /* Add Video Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal {
+            background-color: var(--card-color);
+            border-radius: 15px;
+            width: 100%;
+            max-width: 500px;
+            padding: 30px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: scale(0.9);
+            transition: transform 0.3s;
+        }
+
+        .modal-overlay.show .modal {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 1.5rem;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s;
+        }
+
+        .close-modal:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px 18px;
+            border-radius: 8px;
+            border: 1px solid #444;
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(255, 0, 0, 0.2);
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn-secondary {
+            background-color: #555;
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .btn-secondary:hover {
+            background-color: #666;
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .btn-primary:hover {
+            background-color: #cc0000;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 0, 0, 0.3);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state i {
+            font-size: 5rem;
+            margin-bottom: 25px;
+            color: var(--secondary-color);
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            color: var(--text-color);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: var(--text-secondary);
+            border-top: 1px solid #333;
+            margin-top: 50px;
+        }
+
+        /* Responsive Design */
+        @media (min-width: 768px) {
+            .header-content {
+                flex-direction: row;
+                align-items: center;
+                gap: 30px;
+            }
+            
+            .header-top {
+                width: auto;
+                gap: 30px;
+            }
+            
+            .search-container {
+                flex: 1;
+                max-width: 600px;
+            }
+            
+            .add-video-btn {
+                order: 3;
+            }
+        }
+
+        @media (max-width: 767px) {
+            header {
+                padding: 15px 0;
+                margin-bottom: 20px;
+            }
+            
+            .add-video-btn span {
+                display: none;
+            }
+            
+            .add-video-btn {
+                padding: 12px;
+                width: 50px;
+                height: 50px;
+                justify-content: center;
+                border-radius: 50%;
+            }
+            
+            .video-grid {
+                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+                gap: 20px;
+            }
+            
+            .modal {
+                padding: 20px;
+                max-height: 85vh;
+            }
+            
+            .toast-container {
+                top: 20px;
+                right: 20px;
+                left: 20px;
+                max-width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .video-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .gallery-title {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+                font-size: 1.5rem;
+            }
+            
+            .logo {
+                font-size: 1.3rem;
+            }
+            
+            .add-video-btn {
+                width: 45px;
+                height: 45px;
+                padding: 10px;
+            }
+            
+            .modal {
+                padding: 15px;
+            }
+            
+            .player-header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Toast Notifications Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Header - Only shown on gallery page -->
+    <header id="mainHeader">
+        <div class="container">
+            <div class="header-content">
+                <div class="header-top">
+                    <div class="logo">
+                        <i class="fas fa-play-circle"></i>
+                        <span>Video Gallery</span>
+                    </div>
+                    <button class="add-video-btn" id="openModalBtn">
+                        <i class="fas fa-plus"></i>
+                        <span>Add Video</span>
+                    </button>
+                </div>
+                <div class="search-container">
+                    <div class="search-bar">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInput" placeholder="Search videos by title...">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container">
+        <!-- Video Gallery Page -->
+        <div class="main-content">
+            <div class="video-gallery" id="galleryPage">
+                <div class="gallery-title">
+                    <h2>Video Gallery</h2>
+                    <div id="videoCount">0 videos</div>
+                </div>
+                <div class="video-grid" id="videoGrid">
+                    <!-- Videos will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Video Player Page - NO HEADER HERE -->
+            <div class="video-player-page" id="playerPage">
+                <div class="player-header">
+                    <button class="back-btn" id="backBtn">
+                        <i class="fas fa-arrow-left"></i>
+                        Back to Gallery
+                    </button>
+                </div>
+                <div class="player-container">
+                    <div class="video-player-container">
+                        <div class="video-player" id="videoPlayer">
+                            <!-- YouTube iframe will be inserted here -->
+                        </div>
+                    </div>
+                    <h2 class="player-title" id="playerTitle">Video Title</h2>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Add Video Modal -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Add New Video</h3>
+                <button class="close-modal" id="closeModalBtn">&times;</button>
+            </div>
+            <form id="addVideoForm">
+                <div class="form-group">
+                    <label for="videoTitle">Video Title</label>
+                    <input type="text" id="videoTitle" placeholder="Enter video title" required>
+                </div>
+                <div class="form-group">
+                    <label for="videoUrl">YouTube URL or Video ID</label>
+                    <input type="text" id="videoUrl" placeholder="https://www.youtube.com/watch?v=..." required>
+                    <small style="color: var(--text-secondary); margin-top: 5px; display: block;">
+                        Examples: Full URL or just video ID (e.g., dQw4w9WgXcQ)<br>
+                        Supports: youtube.com/watch?v=..., youtu.be/..., youtube.com/live/...
+                    </small>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" id="cancelBtn">Cancel</button>
+                    <button type="submit" class="btn-primary">Add Video</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>Video Gallery &copy; 2023 | Your changes are saved automatically</p>
+    </footer>
+
+    <script>
+        // DOM Elements
+        const galleryPage = document.getElementById('galleryPage');
+        const playerPage = document.getElementById('playerPage');
+        const videoGrid = document.getElementById('videoGrid');
+        const searchInput = document.getElementById('searchInput');
+        const openModalBtn = document.getElementById('openModalBtn');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const modalOverlay = document.getElementById('modalOverlay');
+        const addVideoForm = document.getElementById('addVideoForm');
+        const backBtn = document.getElementById('backBtn');
+        const videoPlayer = document.getElementById('videoPlayer');
+        const playerTitle = document.getElementById('playerTitle');
+        const videoCount = document.getElementById('videoCount');
+        const mainHeader = document.getElementById('mainHeader');
+
+        // Sample placeholder videos data
+        const placeholderVideos = [
+            {
+                id: "1",
+                title: "Beautiful Nature Scenery",
+                videoId: "dQw4w9WgXcQ",
+                thumbnail: "https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg",
+                added: new Date().toISOString()
+            },
+            {
+                id: "2",
+                title: "Amazing Wildlife Documentary",
+                videoId: "jNQXAC9IVRw",
+                thumbnail: "https://img.youtube.com/vi/jNQXAC9IVRw/hqdefault.jpg",
+                added: new Date().toISOString()
+            },
+            {
+                id: "3",
+                title: "Learn JavaScript in 1 Hour",
+                videoId: "W6NZfCO5SIk",
+                thumbnail: "https://img.youtube.com/vi/W6NZfCO5SIk/hqdefault.jpg",
+                added: new Date().toISOString()
+            },
+            {
+                id: "4",
+                title: "Space Exploration Documentary",
+                videoId: "OrQznLdQdJo",
+                thumbnail: "https://img.youtube.com/vi/OrQznLdQdJo/hqdefault.jpg",
+                added: new Date().toISOString()
+            },
+            {
+                id: "5",
+                title: "Cooking Traditional Italian Pasta",
+                videoId: "V_4OYhW7QQ4",
+                thumbnail: "https://img.youtube.com/vi/V_4OYhW7QQ4/hqdefault.jpg",
+                added: new Date().toISOString()
+            },
+            {
+                id: "6",
+                title: "Top 10 Travel Destinations",
+                videoId: "B9FzVhw8_bY",
+                thumbnail: "https://img.youtube.com/vi/B9FzVhw8_bY/hqdefault.jpg",
+                added: new Date().toISOString()
+            }
+        ];
+
+        // Get videos from localStorage or initialize with placeholders
+        let videos = JSON.parse(localStorage.getItem('videoGallery')) || placeholderVideos;
+        
+        // Track current video
+        let currentVideoId = null;
+        let currentVideoIframe = null;
+
+        // Initialize the gallery
+        function initGallery() {
+            renderVideos(videos);
+            updateVideoCount();
+            
+            // Save placeholder videos to localStorage if it's empty
+            if (!localStorage.getItem('videoGallery')) {
+                saveToLocalStorage();
+            }
+        }
+
+        // Show toast notification
+        function showToast(title, message, type = 'info', duration = 4000) {
+            const toastContainer = document.getElementById('toastContainer');
+            const toastId = 'toast-' + Date.now();
+            
+            const icons = {
+                success: 'fa-check-circle',
+                error: 'fa-exclamation-circle',
+                info: 'fa-info-circle'
+            };
+            
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.id = toastId;
+            toast.innerHTML = `
+                <div class="toast-icon">
+                    <i class="fas ${icons[type]}"></i>
+                </div>
+                <div class="toast-content">
+                    <div class="toast-title">${title}</div>
+                    <div class="toast-message">${message}</div>
+                </div>
+                <button class="toast-close" onclick="removeToast('${toastId}')">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            toastContainer.appendChild(toast);
+            
+            // Trigger animation
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 10);
+            
+            // Auto remove after duration
+            if (duration > 0) {
+                setTimeout(() => {
+                    removeToast(toastId);
+                }, duration);
+            }
+            
+            return toastId;
+        }
+
+        // Remove toast
+        function removeToast(toastId) {
+            const toast = document.getElementById(toastId);
+            if (toast) {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 400);
+            }
+        }
+
+        // Render videos to the gallery
+        function renderVideos(videosToRender) {
+            videoGrid.innerHTML = '';
+            
+            if (videosToRender.length === 0) {
+                videoGrid.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-film"></i>
+                        <h3>No videos found</h3>
+                        <p>Add your first video using the "Add Video" button</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            videosToRender.forEach(video => {
+                const videoCard = document.createElement('div');
+                videoCard.className = 'video-card';
+                videoCard.dataset.id = video.id;
+                
+                // Format date
+                const date = new Date(video.added);
+                const formattedDate = date.toLocaleDateString('en-US', { 
+                    year: 'numeric', 
+                    month: 'short', 
+                    day: 'numeric' 
+                });
+                
+                videoCard.innerHTML = `
+                    <div class="thumbnail-container">
+                        <img src="${video.thumbnail}" alt="${video.title}" loading="lazy">
+                    </div>
+                    <div class="video-info">
+                        <div class="video-title">${video.title}</div>
+                        <div class="video-meta">
+                            <span>Added: ${formattedDate}</span>
+                            <button class="delete-btn" data-id="${video.id}" title="Delete video">
+                                <i class="fas fa-trash"></i>
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                videoGrid.appendChild(videoCard);
+                
+                // Add click event to open video
+                videoCard.addEventListener('click', (e) => {
+                    if (!e.target.closest('.delete-btn')) {
+                        openVideoPlayer(video);
+                    }
+                });
+                
+                // Add delete event
+                const deleteBtn = videoCard.querySelector('.delete-btn');
+                deleteBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    deleteVideo(video.id, video.title);
+                });
+            });
+        }
+
+        // Open video player
+        function openVideoPlayer(video) {
+            playerTitle.textContent = video.title;
+            currentVideoId = video.videoId;
+            
+            // Hide main header when in video player
+            mainHeader.style.display = 'none';
+            
+            // Clear previous iframe
+            videoPlayer.innerHTML = '';
+            
+            // Create new iframe with YouTube's native fullscreen enabled
+            const iframe = document.createElement('iframe');
+            iframe.id = 'ytplayer';
+            // Use fs=1 to enable YouTube's native fullscreen button
+            iframe.src = `https://www.youtube.com/embed/${video.videoId}?autoplay=1&rel=0&enablejsapi=1&playsinline=1&fs=1&modestbranding=1`;
+            iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen';
+            iframe.allowFullscreen = true;
+            iframe.referrerpolicy = 'strict-origin-when-cross-origin';
+            iframe.title = video.title;
+            
+            videoPlayer.appendChild(iframe);
+            currentVideoIframe = iframe;
+            
+            galleryPage.style.display = 'none';
+            playerPage.style.display = 'block';
+            
+            // Scroll to top
+            window.scrollTo(0, 0);
+        }
+
+        // Delete a video
+        function deleteVideo(id, title) {
+            // Show custom confirmation with toast
+            const videoToDelete = videos.find(v => v.id === id);
+            
+            // Create a confirmation dialog as a toast
+            const confirmToastId = showToast(
+                'Delete Video?',
+                `Are you sure you want to delete "${title}"?`,
+                'error',
+                10000 // Longer duration for confirmation
+            );
+            
+            // Add confirm/cancel buttons to the toast
+            setTimeout(() => {
+                const toast = document.getElementById(confirmToastId);
+                if (toast) {
+                    const actionsDiv = document.createElement('div');
+                    actionsDiv.style.marginTop = '10px';
+                    actionsDiv.style.display = 'flex';
+                    actionsDiv.style.gap = '10px';
+                    actionsDiv.innerHTML = `
+                        <button onclick="confirmDelete('${id}', '${confirmToastId}')" 
+                                style="background: #f44336; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold;">
+                            Delete
+                        </button>
+                        <button onclick="removeToast('${confirmToastId}')" 
+                                style="background: #666; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
+                            Cancel
+                        </button>
+                    `;
+                    
+                    const toastContent = toast.querySelector('.toast-content');
+                    toastContent.appendChild(actionsDiv);
+                }
+            }, 100);
+        }
+
+        // Confirm deletion (called from toast button)
+        window.confirmDelete = function(id, toastId) {
+            removeToast(toastId);
+            
+            videos = videos.filter(video => video.id !== id);
+            renderVideos(videos);
+            saveToLocalStorage();
+            updateVideoCount();
+            
+            // Show success toast
+            showToast(
+                'Video Deleted',
+                'The video has been removed from your gallery.',
+                'success',
+                3000
+            );
+            
+            // If we're filtering, update the search results
+            if (searchInput.value.trim()) {
+                searchVideos();
+            }
+        };
+
+        // Extract YouTube video ID from various URL formats
+        function extractYouTubeId(url) {
+            // Trim whitespace
+            url = url.trim();
+            
+            // If it's already a video ID (11 characters, no special characters)
+            if (/^[a-zA-Z0-9_-]{11}$/.test(url)) {
+                return url;
+            }
+            
+            // Try different YouTube URL patterns
+            const patterns = [
+                /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/v\/|youtube\.com\/live\/)([a-zA-Z0-9_-]{11})/,
+                /(?:youtube\.com\/.*[?&]v=)([a-zA-Z0-9_-]{11})/,
+                /youtu\.be\/([a-zA-Z0-9_-]{11})/,
+                /youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/,
+                /youtube\.com\/v\/([a-zA-Z0-9_-]{11})/,
+                /youtube\.com\/live\/([a-zA-Z0-9_-]{11})/
+            ];
+            
+            for (const pattern of patterns) {
+                const match = url.match(pattern);
+                if (match && match[1]) {
+                    return match[1];
+                }
+            }
+            
+            return null;
+        }
+
+        // Add a new video
+        function addVideo(title, url) {
+            // Extract video ID from URL
+            const videoId = extractYouTubeId(url);
+            
+            // Validate video ID
+            if (!videoId || videoId.length !== 11) {
+                showToast(
+                    'Invalid URL',
+                    'Please enter a valid YouTube URL or Video ID (11 characters)',
+                    'error',
+                    4000
+                );
+                return false;
+            }
+            
+            // Check if video already exists
+            if (videos.some(video => video.videoId === videoId)) {
+                showToast(
+                    'Duplicate Video',
+                    'This video is already in your gallery',
+                    'error',
+                    4000
+                );
+                return false;
+            }
+            
+            // Create new video object
+            const newVideo = {
+                id: Date.now().toString(), // Simple ID generation
+                title: title,
+                videoId: videoId,
+                thumbnail: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
+                added: new Date().toISOString()
+            };
+            
+            // Add to videos array
+            videos.unshift(newVideo);
+            
+            // Re-render gallery
+            renderVideos(videos);
+            
+            // Save to localStorage
+            saveToLocalStorage();
+            
+            // Update video count
+            updateVideoCount();
+            
+            // Clear search if active
+            searchInput.value = '';
+            
+            // Show success toast
+            showToast(
+                'Video Added',
+                `"${title}" has been added to your gallery.`,
+                'success',
+                3000
+            );
+            
+            return true;
+        }
+
+        // Search videos
+        function searchVideos() {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            
+            if (!searchTerm) {
+                renderVideos(videos);
+                return;
+            }
+            
+            const filteredVideos = videos.filter(video => 
+                video.title.toLowerCase().includes(searchTerm)
+            );
+            
+            renderVideos(filteredVideos);
+        }
+
+        // Update video count
+        function updateVideoCount() {
+            videoCount.textContent = `${videos.length} video${videos.length !== 1 ? 's' : ''}`;
+        }
+
+        // Save videos to localStorage
+        function saveToLocalStorage() {
+            localStorage.setItem('videoGallery', JSON.stringify(videos));
+        }
+
+        // Event Listeners
+        openModalBtn.addEventListener('click', () => {
+            modalOverlay.style.display = 'flex';
+            setTimeout(() => {
+                modalOverlay.classList.add('show');
+                document.getElementById('videoTitle').focus();
+            }, 10);
+        });
+
+        closeModalBtn.addEventListener('click', () => {
+            modalOverlay.classList.remove('show');
+            setTimeout(() => {
+                modalOverlay.style.display = 'none';
+                addVideoForm.reset();
+            }, 300);
+        });
+
+        cancelBtn.addEventListener('click', () => {
+            modalOverlay.classList.remove('show');
+            setTimeout(() => {
+                modalOverlay.style.display = 'none';
+                addVideoForm.reset();
+            }, 300);
+        });
+
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) {
+                modalOverlay.classList.remove('show');
+                setTimeout(() => {
+                    modalOverlay.style.display = 'none';
+                    addVideoForm.reset();
+                }, 300);
+            }
+        });
+
+        addVideoForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const title = document.getElementById('videoTitle').value.trim();
+            const url = document.getElementById('videoUrl').value.trim();
+            
+            if (title && url) {
+                const success = addVideo(title, url);
+                
+                if (success) {
+                    modalOverlay.classList.remove('show');
+                    setTimeout(() => {
+                        modalOverlay.style.display = 'none';
+                        addVideoForm.reset();
+                    }, 300);
+                }
+            }
+        });
+
+        backBtn.addEventListener('click', () => {
+            playerPage.style.display = 'none';
+            galleryPage.style.display = 'block';
+            
+            // Show main header again
+            mainHeader.style.display = 'block';
+            
+            // Stop video playback
+            if (currentVideoIframe) {
+                currentVideoIframe.src = '';
+                videoPlayer.innerHTML = '';
+                currentVideoIframe = null;
+            }
+        });
+
+        searchInput.addEventListener('input', searchVideos);
+
+        // Initialize the gallery on load
+        document.addEventListener('DOMContentLoaded', initGallery);
+    </script>
+</body>
+</html>
